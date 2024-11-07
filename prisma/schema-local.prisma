@@ -22,8 +22,8 @@ model user {
   public_id String    @unique @db.VarChar(256)
   name      String    @db.VarChar(100)
   email     String    @unique @db.VarChar(200)
-  age       Int
-  ethnicity String
+  age       Int?
+  ethnicity String?
   pass      String    @db.VarChar(256)
   avatar    String?   @db.VarChar(1000)
   record   record[]
