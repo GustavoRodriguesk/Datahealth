@@ -2,6 +2,8 @@ import express from 'express'
 import cors from 'cors'
 import authRouter from './routers/authRouter.js'
 import recordRouter from './routers/recordRouter.js'
+import medicationRouter from './routers/medicationRouter.js'
+
 import errorHandler from './middlewares/errorHandler.js'
 import welcome from './controllers/welcome.js'
 import { ENVIRONMENT, PORT, HOST } from './config.js'
@@ -18,6 +20,8 @@ app.get('/', welcome)
 app.use('/auth', authRouter)
 
 app.use('/record', recordRouter)
+app.use('/medication', medicationRouter)
+
 
 app.use(errorHandler)
 

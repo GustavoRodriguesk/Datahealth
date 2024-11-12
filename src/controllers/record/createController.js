@@ -1,62 +1,65 @@
-import { create } from "../../models/recordModel.js";
+import express from 'express';
 import multer from 'multer';
-import express from 'express'; 
 import cloudinary from 'cloudinary';
-
-const router = express.Router();
+import { create } from '../../models/recordModel.js';  
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 cloudinary.v2.config({
-    cloud_name: 'dfcgapbcr',
-    api_key: '297652483131342',
-    api_secret: 'A8SkZ4QWtBZQZHBzO54Dg2azI0I'
+    cloud_name: 'dfcgapbcr',  
+    api_key: '297652483131342',  
+    api_secret: 'A8SkZ4QWtBZQZHBzO54Dg2azI0I'  
 });
 
-const createController = async (req, res, next) => {
+const router = express.Router();
+
+router.post('/', upload.single('exam'), async (req, res) => {
     try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'Nenhum arquivo de imagem enviado.' });
+        }
+
+        const recordData = req.body;
+
         let imageUrl = null;
+
         if (req.file) {
             const uploadOptions = {
-                resource_type: 'auto',
-                public_id: `exam/${Date.now()}_${req.file.originalname}`,
+                resource_type: 'auto',  
+                public_id: `exam/${Date.now()}_${req.file.originalname}`,  
             };
 
             const uploadResponse = await new Promise((resolve, reject) => {
                 cloudinary.v2.uploader.upload_stream(uploadOptions, (error, result) => {
                     if (error) {
-                        return reject(new Error('Erro ao fazer upload da imagem.'));
+                        reject(new Error('Erro ao fazer upload da imagem.'));
                     }
                     resolve(result);
-                }).end(req.file.buffer);
+                }).end(req.file.buffer);  
             });
 
             imageUrl = uploadResponse.secure_url;
         }
 
-        const record = req.body;
         if (imageUrl) {
-            record.exam = imageUrl;
+            recordData.exam = imageUrl;
         }
 
-        const result = await create(record);
+        const newRecord = await create(recordData);
 
-        if (!result) {
-            return res.status(401).json({
-                error: "Erro ao criar conta!"
-            });
-        }
-
-        return res.json({
-            success: "Conta criada com sucesso!",
-            record: result
+        return res.status(201).json({
+            message: 'Registro criado com sucesso!',
+            record: newRecord
         });
-    } catch (error) {
-        next(error);
-    }
-};
 
-router.post('/create', upload.single('exam'), createController);
+    } catch (error) {
+        if (error.message.startsWith('Erro ao fazer upload da imagem')) {
+            return res.status(400).json({ error: error.message });
+        }
+
+        return res.status(500).json({ error: 'Erro interno no servidor', details: error.message });
+    }
+});
 
 export default router;

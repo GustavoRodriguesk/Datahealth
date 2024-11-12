@@ -46,6 +46,7 @@ const login = async (req, res, next) => {
             success: "Login realizado com sucesso!",
             accessToken: token,
             user: {
+                id: user.id,
                 public_id: user.public_id,
                 name: user.name,
                 avatar: user.avatar,
