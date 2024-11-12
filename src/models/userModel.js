@@ -37,7 +37,21 @@ const accountSchema = z.object({
             required_error: "A senha é obrigatória"
         })
         .min(6, {message: "A senha deve ter ao menos 6 caracter"})
-        .max(500, {message: "A senha deve ter no máximo 500 caracteres"})
+        .max(500, {message: "A senha deve ter no máximo 500 caracteres"}),
+        age: z.number({
+            invalid_type_error: "A idade deve ser um número",
+            required_error: "A idade é obrigatória"
+        })
+        .int({ message: "A idade deve ser um número inteiro" }) 
+        .positive({ message: "A idade deve ser um número positivo" })  
+        .min(1, { message: "A idade deve ser maior que 0" }),  
+
+    ethnicity: z.string({
+            invalid_type_error: "A etnia deve ser uma string",
+            required_error: "A etnia é obrigatória"
+        })
+        .min(2, { message: "A etnia deve ter pelo menos 2 caracteres" })  
+        .max(50, { message: "A etnia deve ter no máximo 50 caracteres" })
 })
 
 export const userValidateToCreate = (account) => {

@@ -36,7 +36,7 @@ const login = async (req, res, next) => {
             })
 
         // gero o token de acesso
-        const token = jwt.sign({public_id: user.public_id, name: user.name }, SECRET_KEY, { expiresIn: 60 * 5 })
+        const token = jwt.sign({public_id: user.public_id, name: user.name }, SECRET_KEY, { expiresIn: 600 * 5 })
 
         // salvar o token gerado na sessão (bd)
         await createSession(user.id, token)

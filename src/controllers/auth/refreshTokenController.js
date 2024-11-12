@@ -22,7 +22,7 @@ const refreshToken = async (req, res, next) => {
         const userLogged = await getById(session.user_id)
 
         // gero o token de acesso
-        const newToken = jwt.sign({public_id: userLogged.public_id, name: userLogged.name }, SECRET_KEY, { expiresIn: 60 * 5 })
+        const newToken = jwt.sign({public_id: userLogged.public_id, name: userLogged.name }, SECRET_KEY, { expiresIn: 600 * 5 })
 
         //update do novo token
         const result = await updateToken(accessToken, newToken)
