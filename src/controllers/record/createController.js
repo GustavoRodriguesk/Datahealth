@@ -22,6 +22,12 @@ router.post('/', upload.single('exam'), async (req, res) => {
 
         const recordData = req.body;
 
+        if (!recordData.user_id || isNaN(parseInt(recordData.user_id))) {
+            return res.status(400).json({ error: 'user_id deve ser um valor numérico válido.' });
+        }
+
+        recordData.user_id = parseInt(recordData.user_id); 
+
         let imageUrl = null;
 
         if (req.file) {
