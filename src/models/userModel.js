@@ -72,7 +72,7 @@ export const userValidateToCreate = (account) => {
 }
 
 export const userValidateToLogin = (account) => {
-    const partialAccountSchema = accountSchema.partial({id: true, public_id: true, avatar: true, name: true})
+    const partialAccountSchema = accountSchema.partial({id: true, public_id: true, avatar: true, name: true, age:true, ethnicity: true, gender: true, Blood_type:true})
     return partialAccountSchema.safeParse(account)
 }
 
