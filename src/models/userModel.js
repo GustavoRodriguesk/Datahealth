@@ -97,3 +97,15 @@ export const signUp = async (user) => {
     })
     return result
 }
+export const listUsers = async (page = 1, limit = 10) => {
+    try {
+        const users = await prisma.user.findMany({
+            skip: (page - 1) * limit,  // Calcula o offset
+            take: limit,  // Limita a quantidade de usuários retornados
+        });
+        return users;
+    } catch (error) {
+        console.error('Erro ao listar usuários:', error);
+        throw new Error('Erro ao listar usuários');
+    }
+};
