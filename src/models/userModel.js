@@ -59,7 +59,7 @@ const accountSchema = z.object({
 })
 .min(2, { message: "o genero deve ter pelo menos 2 caracteres" })  
 .max(50, { message: "o genero deve ter no máximo 50 caracteres" }),
-Blood_type: z.string({
+blood_type: z.string({
     invalid_type_error: "o tipo sanguineo deve ser uma string",
     required_error: "o tipo sanguineo é obrigatório"
 })
@@ -72,7 +72,7 @@ export const userValidateToCreate = (account) => {
 }
 
 export const userValidateToLogin = (account) => {
-    const partialAccountSchema = accountSchema.partial({id: true, public_id: true, avatar: true, name: true, age:true, ethnicity: true, gender: true, Blood_type:true})
+    const partialAccountSchema = accountSchema.partial({id: true, public_id: true, name: true, phone: true, address: true, age: true, birth_date: true, gender: true, marital_status: true, blood_type: true, ethnicity: true, height: true, weight: true, chronic_conditions: true, allergies: true, emergency_contact: true, insurance_provider: true, insurance_number: true, smoker: true, pregnancy_status: true, avatar: true, registered_by: true});
     return partialAccountSchema.safeParse(account)
 }
 

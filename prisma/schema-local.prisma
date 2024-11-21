@@ -28,7 +28,7 @@ model user {
   birth_date         DateTime?
   gender             String
   marital_status     String?   @db.VarChar(50)
-  blood_type         String?
+  blood_type         String
   ethnicity          String
   height             Decimal?  @db.Decimal(5, 2) 
   weight             Decimal?  @db.Decimal(5, 2) 
