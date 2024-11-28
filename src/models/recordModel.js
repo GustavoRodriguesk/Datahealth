@@ -14,14 +14,20 @@ const recordSchema = z.object({
 });
 
 // Listar todos os registros
-export const listRecords = async () => {
+export const listRecords = async (public_id) => {
   const records = await prisma.record.findMany({
-    orderBy: {
-      id: 'desc'
-    }
-  });
-  return records;
+      orderBy: {
+          id: 'desc'
+      },
+      where: {
+          user: {
+              public_id
+          }
+      }
+  })
+  return records
 }
+
 
 export const getByIdRecord = async (id) => {
   const record = await prisma.record.findUnique({
