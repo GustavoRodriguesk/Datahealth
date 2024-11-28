@@ -1,4 +1,4 @@
-import { userValidateToCreate, signUp } from "../../models/userModel.js"
+import { userValidateToCreate, signUp } from "../../models/authModel.js"
 import { v4 as uuid } from 'uuid'
 import bcrypt from "bcrypt"
 
