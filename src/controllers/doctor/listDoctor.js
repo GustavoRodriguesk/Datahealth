@@ -1,12 +1,14 @@
-import { listDoctor } from "../../models/doctorModel.js"
+import { listDoctor } from "../../models/doctorModel.js";
 
-const listDoctorController = async (req, res) => {
-  try {
-    const doctors = await prisma.doctor.findMany()
-    return res.status(200).json(doctors)
-  } catch (error) {
-    return res.status(400).json({ message: 'Erro ao listar médicos', error: error.message })
-  }
+const listDoctorController = async (req, res, next) => {
+  try{
+    const doctors = await listDoctor()
+    return res.json({
+        message: "Prontuarios listados com sucesso!",
+        doctors
+    })
+} catch(error) {
+    next(error)
 }
-
-export default listDoctorController
+}
+export default listDoctorController;

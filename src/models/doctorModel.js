@@ -1,117 +1,78 @@
-import { PrismaClient } from '@prisma/client'
-import { z } from 'zod'
+import { PrismaClient } from '@prisma/client';
+import { z } from 'zod';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
+// Schema para validação de dados
 const doctorSchema = z.object({
-  id: z.number({
-    invalid_type_error: "O id deve ser um valor numérico",
-    required_error: "O id é obrigatório"
-  })
-    .positive({ message: "O id deve ser um número positivo maior que 0" }),
+  id: z.number().positive({ message: "O id deve ser um número positivo maior que 0" }),
+  public_id: z.string().max(256, { message: "O public_id deve ter no máximo 256 caracteres" }),
+  name: z.string().min(3, { message: "O nome deve ter ao menos 3 caracteres" }).max(100),
+  email: z.string().email({ message: "Email inválido" }).max(200),
+  age: z.number().int({ message: "A idade deve ser um número inteiro" }).positive().min(18),
+  gender: z.string().min(3).max(50),
+  specialization: z.string().min(3).max(100),
+  avatar: z.string().url({ message: "URL do avatar inválida" }).optional(),
+});
 
-  public_id: z.string({
-    invalid_type_error: "O public_id deve ser uma string",
-    required_error: "O public_id é obrigatório"
-  })
-    .max(256, { message: "O public_id deve ter no máximo 256 caracteres" }),
-
-  name: z.string({
-    invalid_type_error: "O nome deve ser uma string",
-    required_error: "O nome é obrigatório"
-  })
-    .min(3, { message: "O nome deve ter ao menos 3 caracteres" })
-    .max(100, { message: "O nome deve ter no máximo 100 caracteres" }),
-
-  email: z.string({
-    invalid_type_error: "O email deve ser uma string",
-    required_error: "O email é obrigatório"
-  })
-    .email({ message: "Email inválido" })
-    .max(200, { message: "O email deve ter no máximo 200 caracteres" }),
-
-  age: z.number({
-    invalid_type_error: "A idade deve ser um número",
-    required_error: "A idade é obrigatória"
-  })
-    .int({ message: "A idade deve ser um número inteiro" })
-    .positive({ message: "A idade deve ser um número positivo" })
-    .min(18, { message: "A idade deve ser maior que 17 anos" }),
-
-  gender: z.string({
-    invalid_type_error: "O gênero deve ser uma string",
-    required_error: "O gênero é obrigatório"
-  })
-    .min(3, { message: "O gênero deve ter ao menos 3 caracteres" })
-    .max(50, { message: "O gênero deve ter no máximo 50 caracteres" }),
-
-  specialization: z.string({
-    invalid_type_error: "A especialização deve ser uma string",
-    required_error: "A especialização é obrigatória"
-  })
-    .min(3, { message: "A especialização deve ter ao menos 3 caracteres" })
-    .max(100, { message: "A especialização deve ter no máximo 100 caracteres" }),
-
-  avatar: z.string({
-    invalid_type_error: "O avatar deve ser uma string"
-  })
-    .url({ message: "URL do avatar inválida" })
-    .min(11, { message: "O avatar deve ter no mínimo 11 caracteres" })
-    .max(1000, { message: "O avatar deve ter no máximo 1000 caracteres" })
-    .optional(),
-})
-
+// Função para buscar médico por ID
 export const getDoctorById = async (id) => {
-  const doctor = await prisma.doctor.findUnique({
-    where: { id }
-  })
-  return doctor
-}
-
-
-export const listDoctor = async () => {
-    try {
-      const doctors = await prisma.doctor.findMany()
-      return doctors
-    } catch (error) {
-      throw new Error(`Erro ao listar os médicos: ${error.message}`)
-    }
+  if (!id) throw new Error("O parâmetro id é obrigatório.");
+  try {
+    const doctor = await prisma.doctor.findUnique({ where: { id } });
+    if (!doctor) throw new Error(`Médico com id ${id} não encontrado.`);
+    return doctor;
+  } catch (error) {
+    throw new Error(`Erro ao buscar médico com id ${id}: ${error.message}`);
   }
-  
+};
+
+export const listDoctor = async (page = 1, limit = 10) => {
+  try {
+      const doctors = await prisma.doctor.findMany({
+          skip: (page - 1) * limit,  // Calcula o offset
+          take: limit,  // Limita a quantidade de usuários retornados
+      });
+      return doctors;
+  } catch (error) {
+      console.error('Erro ao listar usuários:', error);
+      throw new Error('Erro ao listar usuários');
+  }
+};
+
+// Função para criar um médico
 export const createDoctor = async (doctor) => {
   try {
-    const validatedDoctor = doctorSchema.omit({ id: true }).parse(doctor) 
-    
-    const result = await prisma.doctor.create({
-      data: validatedDoctor
-    })
-    return result
+    const validatedDoctor = doctorSchema.omit({ id: true }).parse(doctor);
+    return await prisma.doctor.create({ data: validatedDoctor });
   } catch (error) {
-    throw new Error(`Erro de validação: ${error.errors.map(e => e.message).join(', ')}`)
+    if (error instanceof z.ZodError) {
+      throw new Error(`Erro de validação: ${error.errors.map(e => e.message).join(', ')}`);
+    }
+    throw new Error(`Erro ao criar médico: ${error.message}`);
   }
-}
+};
 
+// Função para atualizar médico por ID
 export const updateDoctor = async (id, doctorData) => {
+  if (!id) throw new Error("O parâmetro id é obrigatório.");
   try {
-    const validatedDoctorData = doctorSchema.omit({ id: true }).parse(doctorData)
-
-    const updatedDoctor = await prisma.doctor.update({
-      where: { id },
-      data: validatedDoctorData
-    })
-    return updatedDoctor
+    const validatedDoctorData = doctorSchema.omit({ id: true }).parse(doctorData);
+    return await prisma.doctor.update({ where: { id }, data: validatedDoctorData });
   } catch (error) {
-    throw new Error(`Erro de validação: ${error.errors.map(e => e.message).join(', ')}`)
+    if (error instanceof z.ZodError) {
+      throw new Error(`Erro de validação: ${error.errors.map(e => e.message).join(', ')}`);
+    }
+    throw new Error(`Erro ao atualizar médico com id ${id}: ${error.message}`);
   }
-}
+};
 
+// Função para excluir médico por ID
 export const deleteDoctor = async (id) => {
+  if (!id) throw new Error("O parâmetro id é obrigatório.");
   try {
-    const deletedDoctor = await prisma.doctor.delete({
-      where: { id }
-    })
-    return deletedDoctor
+    return await prisma.doctor.delete({ where: { id } });
   } catch (error) {
-    throw new Error(`Erro ao excluir o médico com id ${id}: ${error.message}`)
+    throw new Error(`Erro ao excluir médico com id ${id}: ${error.message}`);
   }
-}
+};
