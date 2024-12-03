@@ -24,7 +24,7 @@ model user {
   email       String       @unique @db.VarChar(200)
   age         Int
   gender      String
-  blood_type  String        @db.VarChar(10) // Corrigido para evitar maiúsculas inconsistentes
+  blood_type  String        @db.VarChar(10) 
   ethnicity   String        @db.VarChar(50)
   pass        String        @db.VarChar(256)
   avatar      String?       @db.VarChar(1000)
