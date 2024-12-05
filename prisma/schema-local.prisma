@@ -35,7 +35,6 @@ model user {
 
 model Doctor {
   id             Int     @id @default(autoincrement())
-  public_id      String  @unique @db.VarChar(256)
   name           String  @db.VarChar(100)
   email          String  @unique @db.VarChar(200)
   age            Int
