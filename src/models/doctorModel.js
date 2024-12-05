@@ -13,7 +13,6 @@ const doctorSchema = z.object({
   avatar: z.string().url({ message: "URL do avatar inválida" }).optional(),
 });
 
-// Função para buscar médico por ID
 export const getDoctorById = async (id) => {
   if (!id) throw new Error("O parâmetro id é obrigatório.");
   try {
@@ -38,7 +37,6 @@ export const listDoctor = async (page = 1, limit = 10) => {
   }
 };
 
-// Função para criar um médico
 export const createDoctor = async (doctor) => {
   try {
     const validatedDoctor = doctorSchema.omit({ id: true }).parse(doctor);

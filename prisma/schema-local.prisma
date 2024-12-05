@@ -47,7 +47,7 @@ model record {
   id      Int      @id @default(autoincrement())
   report  String   @db.VarChar(255)
   exam    String   @db.VarChar(255)
-  recipe  String?  @db.VarChar(1000)
+  recipe  String  @db.VarChar(1000)
   user_id Int
   date    DateTime
   user    user     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
@@ -59,7 +59,7 @@ model medication {
   id          Int     @id @default(autoincrement())
   medicine    String  @db.VarChar(255)
   description String  @db.VarChar(255)
-  image       String? @db.VarChar(1000)
+  image       String @db.VarChar(1000)
   user_id     Int
   period      Int
   user        user    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)

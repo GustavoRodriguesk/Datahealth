@@ -2,7 +2,6 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 import { z } from 'zod';
 
-// Definir o esquema de validação com Zod
 const recordSchema = z.object({
   report: z.string().min(1, "O campo 'report' é obrigatório"),
   exam: z.string().min(1, "O campo 'exam' é obrigatório"),
@@ -13,7 +12,6 @@ const recordSchema = z.object({
   })
 });
 
-// Listar todos os registros
 export const listRecords = async (public_id) => {
   const records = await prisma.record.findMany({
       orderBy: {
