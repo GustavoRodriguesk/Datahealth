@@ -3,10 +3,8 @@ import { z } from 'zod';
 
 const prisma = new PrismaClient();
 
-// Schema para validação de dados
 const doctorSchema = z.object({
   id: z.number().positive({ message: "O id deve ser um número positivo maior que 0" }),
-  public_id: z.string().max(256, { message: "O public_id deve ter no máximo 256 caracteres" }),
   name: z.string().min(3, { message: "O nome deve ter ao menos 3 caracteres" }).max(100),
   email: z.string().email({ message: "Email inválido" }).max(200),
   age: z.number().int({ message: "A idade deve ser um número inteiro" }).positive().min(18),
@@ -15,7 +13,6 @@ const doctorSchema = z.object({
   avatar: z.string().url({ message: "URL do avatar inválida" }).optional(),
 });
 
-// Função para buscar médico por ID
 export const getDoctorById = async (id) => {
   if (!id) throw new Error("O parâmetro id é obrigatório.");
   try {
@@ -30,8 +27,8 @@ export const getDoctorById = async (id) => {
 export const listDoctor = async (page = 1, limit = 10) => {
   try {
       const doctors = await prisma.doctor.findMany({
-          skip: (page - 1) * limit,  // Calcula o offset
-          take: limit,  // Limita a quantidade de usuários retornados
+          skip: (page - 1) * limit,  
+          take: limit,  
       });
       return doctors;
   } catch (error) {
@@ -40,7 +37,6 @@ export const listDoctor = async (page = 1, limit = 10) => {
   }
 };
 
-// Função para criar um médico
 export const createDoctor = async (doctor) => {
   try {
     const validatedDoctor = doctorSchema.omit({ id: true }).parse(doctor);
@@ -53,7 +49,6 @@ export const createDoctor = async (doctor) => {
   }
 };
 
-// Função para atualizar médico por ID
 export const updateDoctor = async (id, doctorData) => {
   if (!id) throw new Error("O parâmetro id é obrigatório.");
   try {
@@ -67,7 +62,6 @@ export const updateDoctor = async (id, doctorData) => {
   }
 };
 
-// Função para excluir médico por ID
 export const deleteDoctor = async (id) => {
   if (!id) throw new Error("O parâmetro id é obrigatório.");
   try {
