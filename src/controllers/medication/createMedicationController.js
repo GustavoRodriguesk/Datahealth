@@ -1,10 +1,6 @@
-import { createMedication } from '../../models/medicationModel.js';
-import express from 'express';
-import multer from 'multer';
+import { Router } from 'express';
+import { createMedication } from '../../models/medicationModel.js'; 
 import cloudinary from 'cloudinary';
-
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
 
 cloudinary.v2.config({
     cloud_name: 'dfcgapbcr',  
@@ -12,66 +8,38 @@ cloudinary.v2.config({
     api_secret: 'A8SkZ4QWtBZQZHBzO54Dg2azI0I'  
 });
 
-const router = express.Router();
+const router = Router();
 
-router.post('/', upload.single('image'), async (req, res) => {
-  try {
-      if (!req.file) {
-          return res.status(400).json({ error: 'Nenhum arquivo de imagem enviado.' });
-      }
+router.post('/', async (req, res) => {
+    const { medicine, description, user_id, period, image_url } = req.body;
 
-      const medicationData = req.body;
+    
+    if (!medicine || !description || !user_id || !period || isNaN(user_id) || isNaN(period) || !image_url) {
+        return res.status(400).json({ message: 'Preencha todos os campos obrigatórios corretamente.' });
+    }
 
-      if (!medicationData.user_id || isNaN(parseInt(medicationData.user_id))) {
-          return res.status(400).json({ error: 'user_id deve ser um valor numérico válido.' });
-      }
+    try {
+       
+        const uploadResponse = await cloudinary.v2.uploader.upload(image_url, {
+            resource_type: 'auto',  
+            public_id: `medications/${Date.now()}_${medicine.replace(/\s+/g, '_')}`,  // Set unique file name
+        });
 
-      medicationData.user_id = parseInt(medicationData.user_id); 
+        const medicationData = {
+            medicine,
+            description,
+            image: uploadResponse.secure_url,  
+            user_id: parseInt(user_id),  
+            period: parseInt(period),  
+        };
 
-      if (medicationData.period && isNaN(parseInt(medicationData.period))) {
-          return res.status(400).json({ error: 'O campo period deve ser um número válido.' });
-      }
+        const novoMedicamento = await createMedication(medicationData);
 
-      medicationData.period = parseInt(medicationData.period);
-
-      let imageUrl = null;
-
-      if (req.file) {
-          const uploadOptions = {
-              resource_type: 'auto',  
-              public_id: `image/${Date.now()}_${req.file.originalname}`,  
-          };
-
-          const uploadResponse = await new Promise((resolve, reject) => {
-              cloudinary.v2.uploader.upload_stream(uploadOptions, (error, result) => {
-                  if (error) {
-                      reject(new Error('Erro ao fazer upload da imagem.'));
-                  }
-                  resolve(result);
-              }).end(req.file.buffer);  
-          });
-
-          imageUrl = uploadResponse.secure_url;
-      }
-
-      if (imageUrl) {
-          medicationData.image = imageUrl;
-      }
-
-      const newMedication = await createMedication(medicationData);
-
-      return res.status(201).json({
-          message: 'Registro criado com sucesso!',
-          medication: newMedication
-      });
-
-  } catch (error) {
-      if (error.message.startsWith('Erro ao fazer upload da imagem')) {
-          return res.status(400).json({ error: error.message });
-      }
-
-      return res.status(500).json({ error: 'Erro interno no servidor', details: error.message });
-  }
+        res.status(201).json(novoMedicamento);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Erro ao criar medicamento.' });
+    }
 });
 
 export default router;
