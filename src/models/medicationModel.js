@@ -8,9 +8,7 @@ const medicationSchema = z.object({
     image: z.string().min(1, "O campo 'image' é obrigatório"),
     user_id: z.number().int().positive("O campo 'user_id' deve ser um número positivo"),
     period: z.number().int().positive("O campo 'period' deve ser um número positivo"),
-    date: z.string().refine(val => !isNaN(Date.parse(val)), {
-      message: "O campo 'date' deve ser uma data válida",
-    }).optional()
+    
   });
 
 
