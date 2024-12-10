@@ -41,14 +41,3 @@ export const updateToken = async (oldToken, newToken) => {
     })
     return result
 }
-
-// export const getByEmail = async (email) => {
-//     const user = await prisma.user.findUnique({
-//         where: {
-//             email
-//         }
-//     })
-//     return user
-// }
-
-

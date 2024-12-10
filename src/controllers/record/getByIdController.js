@@ -1,7 +1,6 @@
 import { getByIdRecord } from "../../models/recordModel.js"
 
 const getById = async (req, res, next) => {
-    //const id = req.params.id
     try{ 
         const {id} = req.params
         const record = await getByIdRecord(+id)
