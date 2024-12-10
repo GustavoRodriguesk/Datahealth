@@ -36,10 +36,10 @@ model user {
 model Doctor {
   id             Int     @id @default(autoincrement())
   name           String  @db.VarChar(100)
-  email          String  @unique @db.VarChar(200)
-  age            Int
+  email          String? @unique @db.VarChar(200) 
+  age            Int?
   gender         String
-  specialization String  @db.VarChar(100)
+  specialization String? @db.VarChar(100) 
   avatar         String? @db.VarChar(1000)
 }
 
