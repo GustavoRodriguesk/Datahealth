@@ -1,56 +1,48 @@
-import express from 'express';
-import multer from 'multer';
+import { Router } from 'express';
+import { create } from '../../models/recordModel.js';
 import cloudinary from 'cloudinary';
-import { create } from '../../models/recordModel.js';  
-
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
 
 cloudinary.v2.config({
-    cloud_name: 'dfcgapbcr',  
-    api_key: '297652483131342',  
-    api_secret: 'A8SkZ4QWtBZQZHBzO54Dg2azI0I'  
+    cloud_name: 'dfcgapbcr',
+    api_key: '297652483131342',
+    api_secret: 'A8SkZ4QWtBZQZHBzO54Dg2azI0I'
 });
 
-const router = express.Router();
+const router = Router();
 
-router.post('/', upload.single('exam'), async (req, res) => {
+router.post('/', async (req, res) => {
+    const { report, recipe, user_id, date, image_url } = req.body;
+
+    if (!report || !recipe || !user_id || !date || !image_url || isNaN(user_id)) {
+        return res.status(400).json({ message: 'Preencha todos os campos obrigatórios corretamente.' });
+    }
+
     try {
-        if (!req.file) {
-            return res.status(400).json({ error: 'Nenhum arquivo de imagem enviado.' });
+        const isValidUrl = (url) => {
+            try {
+                new URL(url);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        };
+
+        if (!isValidUrl(image_url)) {
+            return res.status(400).json({ message: 'A URL da imagem não é válida.' });
         }
 
-        const recordData = req.body;
+        const uploadResponse = await cloudinary.v2.uploader.upload(image_url, {
+            resource_type: 'auto',
+            public_id: `record_images/${Date.now()}_${report.replace(/\s+/g, '_')}`,
+        });
 
-        if (!recordData.user_id || isNaN(parseInt(recordData.user_id))) {
-            return res.status(400).json({ error: 'user_id deve ser um valor numérico válido.' });
-        }
-
-        recordData.user_id = parseInt(recordData.user_id); 
-
-        let imageUrl = null;
-
-        if (req.file) {
-            const uploadOptions = {
-                resource_type: 'auto',  
-                public_id: `exam/${Date.now()}_${req.file.originalname}`,  
-            };
-
-            const uploadResponse = await new Promise((resolve, reject) => {
-                cloudinary.v2.uploader.upload_stream(uploadOptions, (error, result) => {
-                    if (error) {
-                        reject(new Error('Erro ao fazer upload da imagem.'));
-                    }
-                    resolve(result);
-                }).end(req.file.buffer);  
-            });
-
-            imageUrl = uploadResponse.secure_url;
-        }
-
-        if (imageUrl) {
-            recordData.exam = imageUrl;
-        }
+        const recordData = {
+            report,
+            recipe,
+            date,
+            user_id: parseInt(user_id),
+            exam: uploadResponse.secure_url,
+        };
 
         const newRecord = await create(recordData);
 
@@ -60,11 +52,8 @@ router.post('/', upload.single('exam'), async (req, res) => {
         });
 
     } catch (error) {
-        if (error.message.startsWith('Erro ao fazer upload da imagem')) {
-            return res.status(400).json({ error: error.message });
-        }
-
-        return res.status(500).json({ error: 'Erro interno no servidor', details: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Erro ao criar o registro.', error: error.message });
     }
 });
 
