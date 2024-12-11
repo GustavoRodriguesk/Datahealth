@@ -11,18 +11,18 @@ cloudinary.v2.config({
 const router = Router();
 
 router.post('/', async (req, res) => {
-    const { medicine, description, user_id, period, image_url } = req.body;
+    const { medicine, description, user_id, period, image } = req.body;
 
     
-    if (!medicine || !description || !user_id || !period || isNaN(user_id) || isNaN(period) || !image_url) {
+    if (!medicine || !description || !user_id || !period || isNaN(user_id) || isNaN(period) || !image) {
         return res.status(400).json({ message: 'Preencha todos os campos obrigatórios corretamente.' });
     }
 
     try {
        
-        const uploadResponse = await cloudinary.v2.uploader.upload(image_url, {
+        const uploadResponse = await cloudinary.v2.uploader.upload(image, {
             resource_type: 'auto',  
-            public_id: `medications/${Date.now()}_${medicine.replace(/\s+/g, '_')}`,  // Set unique file name
+            public_id: `medications/${Date.now()}_${medicine.replace(/\s+/g, '_')}`,  
         });
 
         const medicationData = {
