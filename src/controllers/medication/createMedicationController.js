@@ -19,10 +19,10 @@ router.post('/', async (req, res) => {
     }
 
     try {
-
+       
         const uploadResponse = await cloudinary.v2.uploader.upload(image_url, {
             resource_type: 'auto',  
-            public_id: `medications/${Date.now()}_${medicine.replace(/\s+/g, '_')}`,
+            public_id: `medications/${Date.now()}_${medicine.replace(/\s+/g, '_')}`,  // Set unique file name
         });
 
         const medicationData = {
