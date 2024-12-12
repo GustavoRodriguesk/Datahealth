@@ -112,8 +112,8 @@ export const signUp = async (user) => {
 export const listUsers = async (page = 1, limit = 10) => {
     try {
         const users = await prisma.user.findMany({
-            skip: (page - 1) * limit,  // Calcula o offset
-            take: limit,  // Limita a quantidade de usuários retornados
+            skip: (page - 1) * limit,  
+            take: limit,  
         });
         return users;
     } catch (error) {
