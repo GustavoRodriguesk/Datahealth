@@ -60,18 +60,17 @@ export const deleteRecord = async (id) => {
 }
 
 export const update = async (record) => {
-  const parsedData = recordSchema.safeParse(record);
+  const { id, ...data } = record;
+  const parsedData = recordSchema.safeParse(data);
 
   if (!parsedData.success) {
     throw new Error(`Erro de validação: ${JSON.stringify(parsedData.error.format())}`);
   }
 
-  const result = await prisma.record.update({
+  return await prisma.record.update({
     data: parsedData.data,
     where: {
-      id: parsedData.data.id
+      id
     }
   });
-
-  return result;
-}
+};
